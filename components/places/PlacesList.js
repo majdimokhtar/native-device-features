@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   },
   fallbacktext: {
     fontSize: 16,
-    color : Colors.gray700
+    color : Colors.primary100
   },
 })
 
