@@ -5,11 +5,18 @@ import { useLayoutEffect } from "react"
 import IconBtn from "../components/UI/IconBtn"
 import { useCallback } from "react"
 
-const Map = ({ navigation }) => {
-  const [selectedLocation, setSelectedLocation] = useState()
+const Map = ({ navigation, route }) => {
+  const initLocation = route.params
+  ? {
+      lat: route.params.initialLat,
+      lng: route.params.initialLng,
+    }
+  : null
+  const [selectedLocation, setSelectedLocation] = useState(initLocation)
+
   const region = {
-    latitude: 37.78,
-    longitude: -122.43,
+    latitude: initLocation ? initLocation.lat : 37.78,
+    longitude: initLocation ? initLocation.lng : -122.43,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   }
@@ -21,21 +28,24 @@ const Map = ({ navigation }) => {
   }
 
   // fuction is used as dependency as another effect avoid infinit loop
-  const savePickedLocationHandler =useCallback(()=> {
+  const savePickedLocationHandler = useCallback(() => {
     if (!selectedLocation) {
       Alert.alert(
         "No location picked",
         "you have to pick a location by tapping on the map"
       )
-      return;
+      return
     }
     navigation.navigate("AddPlace", {
       pickedLat: selectedLocation.lat,
-      picketLng: selectedLocation.lng
+      picketLng: selectedLocation.lng,
     })
-  },[navigation,selectedLocation])
+  }, [navigation, selectedLocation])
 
   useLayoutEffect(() => {
+    if (initLocation) {
+      return
+    }
     navigation.setOptions({
       headerRight: ({ tintColor }) => (
         <IconBtn
@@ -46,7 +56,7 @@ const Map = ({ navigation }) => {
         />
       ),
     })
-  }, [navigation,savePickedLocationHandler])
+  }, [navigation, savePickedLocationHandler,initLocation])
   return (
     <MapView
       initialRegion={region}
