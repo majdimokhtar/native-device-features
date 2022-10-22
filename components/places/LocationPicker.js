@@ -6,14 +6,38 @@ import {
   useForegroundPermissions,
   PermissionStatus,
 } from "expo-location"
-import { useState } from "react"
-import { getMapPreview } from "../../util/location"
-import { useNavigation } from "@react-navigation/native"
+import { useEffect, useState } from "react"
+import { getAddress, getMapPreview } from "../../util/location"
+import { useNavigation, useRoute, useIsFocused } from "@react-navigation/native"
 
-const LocationPicker = () => {
+const LocationPicker = ({ onPickLocation }) => {
   const navigation = useNavigation()
+  const route = useRoute()
   const [pickedLocation, setPickedLocation] = useState()
+  const isFocused = useIsFocused()
   const [locationPermissionInfo, requestPermission] = useForegroundPermissions()
+
+  useEffect(() => {
+    if (isFocused && route.params) {
+      const mapPickedLocation = {
+        lat: route.params.pickedLat,
+        lng: route.params.picketLng,
+      }
+      console.log(route.params)
+      setPickedLocation(mapPickedLocation)
+    }
+  }, [route, isFocused])
+
+  useEffect(() => {
+    async function handleLocation() {
+      if (pickedLocation) {
+        const address = await getAddress(pickedLocation.lat, pickedLocation.lng)
+        onPickLocation({...pickedLocation,address : address})
+      }
+    }
+    handleLocation()
+  }, [pickedLocation, onPickLocation])
+
   async function verifyPermission() {
     if (locationPermissionInfo.status === PermissionStatus.UNDETERMINED) {
       const permissionResponse = await requestPermission()
@@ -37,7 +61,7 @@ const LocationPicker = () => {
       return
     }
     const location = await getCurrentPositionAsync()
-    console.log(location)
+    // console.log(location)
     setPickedLocation({
       lat: location.coords.latitude,
       lng: location.coords.longitude,
@@ -73,6 +97,7 @@ const LocationPicker = () => {
 
 const styles = StyleSheet.create({
   mapPreview: {
+    flex: 1,
     width: "100%",
     height: 200,
     justifyContent: "center",
@@ -87,6 +112,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
+    flex: 1,
     width: "100%",
     height: "100%",
     borderRadius: 4,

@@ -10,7 +10,7 @@ import { useState } from "react"
 import { Colors } from "../../constants/colors"
 import OutlineBtn from "../UI/OutlineBtn"
 
-const ImagePicker = () => {
+const ImagePicker = ({onTakeImage}) => {
     const [cameraPermissionInformation, requestPermission] =useCameraPermissions()
     const [pickedImage,setPickedImage] = useState()
 
@@ -42,7 +42,7 @@ const ImagePicker = () => {
         quality: 0.5,
     })
     setPickedImage(image.uri)
-    console.log(image.uri)
+    onTakeImage(image.uri)
   }
   let imagePreview = <Text>No image taken yet</Text>
   if (pickedImage) {
